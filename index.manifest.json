@@ -1,0 +1,28 @@
+{
+  "background_color": "#24212e",
+  "display": "fullscreen",
+  "icons": [
+    {
+      "sizes": "144x144",
+      "src": "index.144x144.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "180x180",
+      "src": "index.180x180.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "index.512x512.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "Stardust Drift",
+  "orientation": "any",
+  "start_url": "./index.html",
+  "short_name": "Stardust Drift",
+  "id": "./",
+  "scope": "./",
+  "theme_color": "#24212e"
+}

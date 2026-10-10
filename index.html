@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#24212e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stardust Drift">
+<title>Stardust Drift · v0.8-web</title>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+<link rel="manifest" href="index.manifest.json">
+
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#24212e;color:#faf6ff;font-family:system-ui,sans-serif;overscroll-behavior:none;touch-action:none}
+#canvas{position:fixed;inset:0;width:100%;height:100%;outline:none;display:block}
+#safe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;text-align:center;background:radial-gradient(ellipse at 50% 40%,#363042,#24212e 65%);z-index:2}
+.mark{width:100px;height:100px}.title{font-size:clamp(24px,7vw,36px);letter-spacing:.14em;font-weight:800;line-height:1.3;margin:0}.title span{color:#b3a3db}#message{color:#c8c0d9;min-height:24px;margin:0;font-size:14px}
+progress{width:min(260px,70vw);height:6px;border:none;border-radius:6px;background:#484053;color:#88d5cb}progress::-webkit-progress-bar{background:#484053;border-radius:6px}progress::-webkit-progress-value{background:#88d5cb;border-radius:6px}
+#play{background:#f386b4;border:0;border-radius:14px;color:#24212e;font-size:17px;font-weight:750;padding:16px 36px;min-height:56px;cursor:pointer;touch-action:manipulation}#play:active{transform:scale(.97)}#play[hidden]{display:none}small{color:#a69bb7;font-size:12px}#error{white-space:pre-wrap;overflow-wrap:anywhere;max-width:560px;color:#ffd2da}
+</style></head><body>
+<canvas id="canvas" tabindex="0" aria-label="Stardust Drift game"></canvas><div id="safe"></div>
+<div id="loading"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 91 26v48L50 97 9 74V26Z" fill="#363042" stroke="#b3a3db" stroke-width="2"/><path d="m50 22 20 51-20-10-20 10Z" fill="#faf6ff"/><path d="m43 70 7 19 7-19-7 4Z" fill="#f386b4"/></svg><h1 class="title"><span>STARDUST</span><br>DRIFT</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.8-web</small></div>
+<noscript>JavaScript is required to play.</noscript>
+<script src="index.js"></script><script>
+'use strict';
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4290896,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
+document.documentElement.lang=japanese?'ja':'en';
+window.stardustMobile=navigator.maxTouchPoints>0&&(matchMedia('(pointer:coarse)').matches||/iPad|iPhone|Android/.test(navigator.userAgent));
+window.stardustAudioUnlocked=false;
+window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
+window.stardustSafeArea=function(){const s=getComputedStyle(document.getElementById('safe'));return [s.paddingLeft,s.paddingTop,s.paddingRight,s.paddingBottom].map(parseFloat);};
+function resize(){const w=innerWidth,h=innerHeight,budget=window.stardustMobile?960000:2073600;const full=new URLSearchParams(location.search).get('qa')==='1'&&new URLSearchParams(location.search).get('render')==='full';const r=full?(devicePixelRatio||1):Math.min(devicePixelRatio||1,1.5,Math.sqrt(budget/(w*h)));canvas.width=Math.max(1,Math.round(w*r));canvas.height=Math.max(1,Math.round(h*r));}
+resize();addEventListener('resize',resize);addEventListener('orientationchange',resize);
+const message=document.getElementById('message'),progress=document.getElementById('progress'),play=document.getElementById('play');
+message.textContent=say('宇宙を準備しています…','Preparing your universe…');play.textContent=say('タップして遊ぶ','Tap to play');
+const engine=new Engine(config);
+const options={canvas,canvasResizePolicy:0,onProgress:(current,total)=>{if(total>0){progress.max=total;progress.value=current;}},onPrint:(...args)=>{const line=args.join(' ');console.log(line);if(line.startsWith('[PERF]')||line.startsWith('[WEB]'))window.stardustMetrics.logs.push(line);},onPrintError:(...args)=>console.error(...args)};
+// テスト引数は明示的なQA URLだけ。通常URLに検証用の通貨などを渡さない。
+const query=new URLSearchParams(location.search);
+if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile']);options.args=(query.has('stress')||query.has('bot')||query.has('force_result'))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
+function failure(error){const el=document.getElementById('error');el.hidden=false;el.textContent=String(error);message.textContent=say('起動できませんでした。ページを再読み込みしてください。','Unable to start. Please reload this page.');progress.hidden=true;}
+const missing=Engine.getMissingFeatures({threads:false});
+if(missing.length)failure(say('このブラウザに必要な機能がありません: ','Missing browser features: ')+missing.join(', '));
+else engine.startGame(options).then(()=>{window.stardustMetrics.ready=performance.now();resize();progress.hidden=true;play.hidden=false;message.textContent=say('小さな一歩から、宇宙のその先へ。','A small beginning. A universe to discover.');engine.installServiceWorker().catch(error=>console.warn('Offline cache unavailable:',error));}).catch(failure);
+play.addEventListener('click',()=>{window.stardustAudioUnlocked=true;window.stardustMetrics.tap=performance.now();document.getElementById('loading').remove();canvas.focus();let last=performance.now();function frame(now){if(!document.hidden){const dt=now-last;if(dt>0&&dt<1000){const list=window.stardustMetrics.frames;list.push(dt);if(list.length>600)list.shift();}}last=now;requestAnimationFrame(frame);}requestAnimationFrame(frame);});
+</script></body></html>
+
