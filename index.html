@@ -20,14 +20,37 @@
 progress{width:min(260px,70vw);height:6px;border:none;border-radius:6px;background:#484053;color:#88d5cb}progress::-webkit-progress-bar{background:#484053;border-radius:6px}progress::-webkit-progress-value{background:#88d5cb;border-radius:6px}
 #play{background:#f386b4;border:0;border-radius:14px;color:#24212e;font-size:17px;font-weight:750;padding:16px 36px;min-height:56px;cursor:pointer;touch-action:manipulation}#play:active{transform:scale(.97)}#play[hidden]{display:none}small{color:#a69bb7;font-size:12px}#error{white-space:pre-wrap;overflow-wrap:anywhere;max-width:560px;color:#ffd2da}
 </style></head><body>
+<style>
+#loading{overflow-y:auto;justify-content:safe center;gap:14px;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));touch-action:pan-y}
+.mark{flex-shrink:0}#install-controls{max-width:360px}#install{border:1px solid #b3a3db;background:#363042;color:#faf6ff;border-radius:12px;padding:12px 20px;min-height:48px;font-size:14px;cursor:pointer;touch-action:manipulation}#install-help{font-size:13px;line-height:1.6;color:#c8c0d9;margin:10px 0 0}#install-controls[hidden],#install-help[hidden]{display:none}
+</style>
 <canvas id="canvas" tabindex="0" aria-label="Stardust Drift game"></canvas><div id="safe"></div>
 <div id="loading"><svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 3 91 26v48L50 97 9 74V26Z" fill="#363042" stroke="#b3a3db" stroke-width="2"/><path d="m50 22 20 51-20-10-20 10Z" fill="#faf6ff"/><path d="m43 70 7 19 7-19-7 4Z" fill="#f386b4"/></svg><h1 class="title"><span>STARDUST</span><br>DRIFT</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.8-web</small></div>
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4290896,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4291632,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
+const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
+const Loc={t:key=>installStrings[key][japanese?1:0]};
+const installControls=document.createElement('div');installControls.id='install-controls';
+installControls.innerHTML='<button id="install" aria-controls="install-help" aria-expanded="false"></button><p id="install-help" role="status" hidden></p>';
+document.getElementById('loading').insertBefore(installControls,document.getElementById('error'));
+const installButton=document.getElementById('install'),installHelp=document.getElementById('install-help');
+installButton.textContent=Loc.t('web.install.button');
+const installed=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;
+installControls.hidden=installed();
+let installPrompt=null;
+addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;installControls.hidden=installed();});
+addEventListener('appinstalled',()=>{installPrompt=null;installControls.hidden=true;});
+installButton.addEventListener('click',async()=>{
+ if(installButton.disabled)return;
+ const pending=installPrompt;installPrompt=null;
+ if(pending){installButton.disabled=true;try{await pending.prompt();const choice=await pending.userChoice;if(choice.outcome==='accepted'){installControls.hidden=true;return;}}catch(error){console.warn('Installation prompt unavailable:',error);}finally{installButton.disabled=false;}}
+ const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ installHelp.textContent=Loc.t(ios?'web.install.ios':'web.install.manual');installHelp.hidden=false;installButton.setAttribute('aria-expanded','true');
+});
 window.stardustMobile=navigator.maxTouchPoints>0&&(matchMedia('(pointer:coarse)').matches||/iPad|iPhone|Android/.test(navigator.userAgent));
 window.stardustAudioUnlocked=false;
 window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
