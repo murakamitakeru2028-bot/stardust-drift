@@ -29,7 +29,7 @@ progress{width:min(260px,70vw);height:6px;border:none;border-radius:6px;backgrou
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5119824,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5129952,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -106,7 +106,7 @@ const engine=new Engine(config);
 const options={canvas,canvasResizePolicy:0,onProgress:(current,total)=>{if(total>0){progress.max=total;progress.value=current;}},onPrint:(...args)=>{const line=args.join(' ');console.log(line);if(line.startsWith('[PERF]')||line.startsWith('[WEB]'))window.stardustMetrics.logs.push(line);},onPrintError:(...args)=>console.error(...args)};
 // テスト引数は明示的なQA URLだけ。通常URLに検証用の通貨などを渡さない。
 const query=new URLSearchParams(location.search);
-if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile']);options.args=(query.has('stress')||query.has('bot')||query.has('force_result'))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
+if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile','defense','fuel','cargo','sel','nopause']);options.args=(query.has('stress')||query.has('bot')||query.has('force_result')||query.has('fuel'))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
 function failure(error){const el=document.getElementById('error');el.hidden=false;el.textContent=String(error);message.textContent=say('起動できませんでした。ページを再読み込みしてください。','Unable to start. Please reload this page.');progress.hidden=true;}
 const missing=Engine.getMissingFeatures({threads:false});
 if(missing.length)failure(say('このブラウザに必要な機能がありません: ','Missing browser features: ')+missing.join(', '));
