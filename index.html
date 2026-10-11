@@ -29,7 +29,7 @@ progress{width:min(260px,70vw);height:6px;border:none;border-radius:6px;backgrou
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5060688,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5108336,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -53,6 +53,32 @@ installButton.addEventListener('click',async()=>{
 });
 window.stardustMobile=navigator.maxTouchPoints>0&&(matchMedia('(any-pointer:coarse)').matches||/iPad|iPhone|Android/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
 window.stardustAudioUnlocked=false;
+  // Touch Eventsを出さないタブレットでも、Pointer EventsをGodotへ届ける。
+  let nativeTouches=false;
+  const pointerTouches=new Map();
+  canvas.addEventListener('touchstart',event=>{if(event.isTrusted)nativeTouches=true;},{capture:true,passive:true});
+  function forwardTouch(type,points){
+   const event=new Event(type,{bubbles:true,cancelable:true});
+   Object.defineProperty(event,'changedTouches',{value:points});
+   canvas.dispatchEvent(event);
+  }
+  canvas.addEventListener('pointerdown',event=>{
+   if(event.pointerType!=='touch')return;
+   const point={identifier:event.pointerId,clientX:event.clientX,clientY:event.clientY};
+   pointerTouches.set(event.pointerId,{point,forwarded:false});
+   setTimeout(()=>{const state=pointerTouches.get(event.pointerId);if(!state||nativeTouches||!window.stardustAudioUnlocked)return;state.forwarded=true;forwardTouch('touchstart',[state.point]);try{canvas.setPointerCapture(event.pointerId);}catch(error){console.debug('Pointer capture unavailable:',error);}},0);
+  });
+  canvas.addEventListener('pointermove',event=>{
+   const state=pointerTouches.get(event.pointerId);if(!state)return;
+   state.point={identifier:event.pointerId,clientX:event.clientX,clientY:event.clientY};
+   if(state.forwarded)forwardTouch('touchmove',[state.point]);
+  });
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,event=>{
+   const state=pointerTouches.get(event.pointerId);if(!state)return;pointerTouches.delete(event.pointerId);
+   if(state.forwarded)forwardTouch(type==='pointerup'?'touchend':'touchcancel',[{identifier:event.pointerId,clientX:event.clientX,clientY:event.clientY}]);
+  });
+  // 互換マウスイベントでタッチ用レイアウトへ戻れなくなるのを防ぐ。
+  for(const type of ['mousedown','mouseup','mousemove'])canvas.addEventListener(type,event=>{if(event.sourceCapabilities?.firesTouchEvents){event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
 window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
 window.stardustSafeArea=function(){const s=getComputedStyle(document.getElementById('safe'));return [s.paddingLeft,s.paddingTop,s.paddingRight,s.paddingBottom].map(parseFloat);};
 const RENDER_QUALITY={mobilePixels:2073600,desktopPixels:4147200,maxRatio:2};
@@ -61,6 +87,22 @@ resize();addEventListener('resize',resize);addEventListener('orientationchange',
 const message=document.getElementById('message'),progress=document.getElementById('progress'),play=document.getElementById('play');
 message.textContent=say('宇宙を準備しています…','Preparing your universe…');play.textContent=say('タップして遊ぶ','Tap to play');
 const engine=new Engine(config);
+  // 古いPWAのキャッシュで修正版が届かない場合は、ゲーム開始前に更新する。
+  async function prepareRelease(){
+   if(!('serviceWorker' in navigator))return true;
+   try{
+    const registration=await navigator.serviceWorker.register('index.service.worker.js',{updateViaCache:'none'});
+    await registration.update();
+    const installing=registration.installing;
+    if(installing)await new Promise(resolve=>{const timer=setTimeout(resolve,8000);installing.addEventListener('statechange',()=>{if(installing.state==='installed'||installing.state==='redundant'){clearTimeout(timer);resolve();}});});
+    if(registration.waiting&&navigator.serviceWorker.controller){
+     navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload(),{once:true});
+     registration.waiting.postMessage('claim');
+     return false;
+    }
+   }catch(error){console.warn('Update check unavailable:',error);}
+   return true;
+  }
 const options={canvas,canvasResizePolicy:0,onProgress:(current,total)=>{if(total>0){progress.max=total;progress.value=current;}},onPrint:(...args)=>{const line=args.join(' ');console.log(line);if(line.startsWith('[PERF]')||line.startsWith('[WEB]'))window.stardustMetrics.logs.push(line);},onPrintError:(...args)=>console.error(...args)};
 // テスト引数は明示的なQA URLだけ。通常URLに検証用の通貨などを渡さない。
 const query=new URLSearchParams(location.search);
@@ -68,7 +110,7 @@ if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','bot','n
 function failure(error){const el=document.getElementById('error');el.hidden=false;el.textContent=String(error);message.textContent=say('起動できませんでした。ページを再読み込みしてください。','Unable to start. Please reload this page.');progress.hidden=true;}
 const missing=Engine.getMissingFeatures({threads:false});
 if(missing.length)failure(say('このブラウザに必要な機能がありません: ','Missing browser features: ')+missing.join(', '));
-else engine.startGame(options).then(()=>{window.stardustMetrics.ready=performance.now();resize();progress.hidden=true;play.hidden=false;message.textContent=say('小さな一歩から、宇宙のその先へ。','A small beginning. A universe to discover.');engine.installServiceWorker().catch(error=>console.warn('Offline cache unavailable:',error));}).catch(failure);
+  else prepareRelease().then(async current=>{if(!current)return;await engine.startGame(options);window.stardustMetrics.ready=performance.now();resize();progress.hidden=true;play.hidden=false;message.textContent=say('小さな一歩から、宇宙のその先へ。','A small beginning. A universe to discover.');engine.installServiceWorker().catch(error=>console.warn('Offline cache unavailable:',error));}).catch(failure);
 play.addEventListener('click',()=>{window.stardustAudioUnlocked=true;window.stardustMetrics.tap=performance.now();document.getElementById('loading').remove();canvas.focus();let last=performance.now();function frame(now){if(!document.hidden){const dt=now-last;if(dt>0&&dt<1000){const list=window.stardustMetrics.frames;list.push(dt);if(list.length>600)list.shift();}}last=now;requestAnimationFrame(frame);}requestAnimationFrame(frame);});
 </script></body></html>
 
