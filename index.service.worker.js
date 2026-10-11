@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1791689465|4463322';
+const CACHE_VERSION = '1791690631|4366940';
 /** @type {string} */
 const CACHE_PREFIX = 'Stardust Drift-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
