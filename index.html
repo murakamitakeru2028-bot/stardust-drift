@@ -29,7 +29,7 @@ progress{width:min(260px,70vw);height:6px;border:none;border-radius:6px;backgrou
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4291632,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":4292416,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -55,7 +55,8 @@ window.stardustMobile=navigator.maxTouchPoints>0&&(matchMedia('(pointer:coarse)'
 window.stardustAudioUnlocked=false;
 window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
 window.stardustSafeArea=function(){const s=getComputedStyle(document.getElementById('safe'));return [s.paddingLeft,s.paddingTop,s.paddingRight,s.paddingBottom].map(parseFloat);};
-function resize(){const w=innerWidth,h=innerHeight,budget=window.stardustMobile?960000:2073600;const full=new URLSearchParams(location.search).get('qa')==='1'&&new URLSearchParams(location.search).get('render')==='full';const r=full?(devicePixelRatio||1):Math.min(devicePixelRatio||1,1.5,Math.sqrt(budget/(w*h)));canvas.width=Math.max(1,Math.round(w*r));canvas.height=Math.max(1,Math.round(h*r));}
+const RENDER_QUALITY={mobilePixels:2073600,desktopPixels:4147200,maxRatio:2};
+function resize(){const w=innerWidth,h=innerHeight,budget=window.stardustMobile?RENDER_QUALITY.mobilePixels:RENDER_QUALITY.desktopPixels;const full=new URLSearchParams(location.search).get('qa')==='1'&&new URLSearchParams(location.search).get('render')==='full';const r=full?(devicePixelRatio||1):Math.min(devicePixelRatio||1,RENDER_QUALITY.maxRatio,Math.sqrt(budget/(w*h)));canvas.width=Math.max(1,Math.round(w*r));canvas.height=Math.max(1,Math.round(h*r));}
 resize();addEventListener('resize',resize);addEventListener('orientationchange',resize);
 const message=document.getElementById('message'),progress=document.getElementById('progress'),play=document.getElementById('play');
 message.textContent=say('宇宙を準備しています…','Preparing your universe…');play.textContent=say('タップして遊ぶ','Tap to play');
