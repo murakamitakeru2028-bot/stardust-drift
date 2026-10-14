@@ -21,10 +21,10 @@
       "purpose": "any maskable"
     }
   ],
-  "name": "Stardust Drift",
+  "name": "COSMINE",
   "orientation": "any",
   "start_url": "./index.html",
-  "short_name": "Stardust Drift",
+  "short_name": "COSMINE",
   "id": "./",
   "scope": "./",
   "theme_color": "#24212e"

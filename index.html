@@ -5,8 +5,8 @@
 <meta name="theme-color" content="#24212e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Stardust Drift">
-<title>Stardust Drift · v0.10</title>
+<meta name="apple-mobile-web-app-title" content="COSMINE">
+<title>COSMINE · v0.11</title>
 <link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
@@ -24,12 +24,12 @@ progress{width:min(280px,70vw);height:6px;border:none;border-radius:6px;backgrou
 #install-controls{max-width:360px}#install{border:1px solid #A9A6BF;background:transparent;color:#FFFFFF;border-radius:14px;padding:12px 20px;min-height:48px;font-size:14px;cursor:pointer;touch-action:manipulation}#install:active{border-color:#38D9C7;color:#38D9C7}#install-help{font-size:13px;line-height:1.6;color:#A9A6BF;margin:10px 0 0}#install-controls[hidden],#install-help[hidden]{display:none}
 @media(max-height:480px){#loading{gap:12px}.title{font-size:28px}}
 </style></head><body>
-<canvas id="canvas" tabindex="0" aria-label="Stardust Drift game"></canvas><div id="safe"></div>
-<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">STAR<span>DU</span>ST<br>DRIFT</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.10</small></div>
+<canvas id="canvas" tabindex="0" aria-label="COSMINE game"></canvas><div id="safe"></div>
+<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">COS<span>MI</span>NE</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.11</small></div>
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5871648,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5992688,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
