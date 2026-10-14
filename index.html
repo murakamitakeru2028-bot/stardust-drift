@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Stardust Drift">
-<title>Stardust Drift · v0.9</title>
+<title>Stardust Drift · v0.10</title>
 <link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
 
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#24212E;color:#FFFFFF;font-family:system-ui,sans-serif;overscroll-behavior:none;touch-action:none}
-#canvas{position:fixed;inset:0;width:100%;height:100%;outline:none;display:block}
+#canvas{position:fixed;inset:0;width:100%;height:100%;outline:none;display:block;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 #safe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:22px;padding:max(32px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));overflow-y:auto;text-align:center;background:radial-gradient(ellipse at 50% 40%,#352F45,#24212E 70%);z-index:2;touch-action:pan-y;isolation:isolate}
 #loading::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 12% 18%,#A9A6BF 1px,transparent 2px),radial-gradient(circle at 82% 24%,#FFFFFF 1px,transparent 2px),radial-gradient(circle at 24% 72%,#A9A6BF 1px,transparent 2px),radial-gradient(circle at 76% 81%,#A9A6BF 1px,transparent 2px),radial-gradient(circle at 56% 12%,#A9A6BF 1px,transparent 2px),radial-gradient(circle at 9% 48%,#A9A6BF 1px,transparent 2px),radial-gradient(circle at 93% 58%,#A9A6BF 1px,transparent 2px);opacity:.5}
@@ -25,11 +25,11 @@ progress{width:min(280px,70vw);height:6px;border:none;border-radius:6px;backgrou
 @media(max-height:480px){#loading{gap:12px}.title{font-size:28px}}
 </style></head><body>
 <canvas id="canvas" tabindex="0" aria-label="Stardust Drift game"></canvas><div id="safe"></div>
-<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">STAR<span>DU</span>ST<br>DRIFT</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.9</small></div>
+<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">STAR<span>DU</span>ST<br>DRIFT</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.10</small></div>
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5377456,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5871648,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -54,12 +54,13 @@ installButton.addEventListener('click',async()=>{
 window.stardustMobile=navigator.maxTouchPoints>0&&(matchMedia('(any-pointer:coarse)').matches||/iPad|iPhone|Android/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
 window.stardustAudioUnlocked=false;
   // Touch Eventsを出さないタブレットでも、Pointer EventsをGodotへ届ける。
-  let nativeTouches=false;
+  let nativeTouches=false,lastTouch=-1e9;
   const pointerTouches=new Map();
   canvas.addEventListener('touchstart',event=>{if(event.isTrusted)nativeTouches=true;},{capture:true,passive:true});
   function forwardTouch(type,points){
    const event=new Event(type,{bubbles:true,cancelable:true});
    Object.defineProperty(event,'changedTouches',{value:points});
+   lastTouch=performance.now();
    canvas.dispatchEvent(event);
   }
   canvas.addEventListener('pointerdown',event=>{
@@ -77,8 +78,22 @@ window.stardustAudioUnlocked=false;
    const state=pointerTouches.get(event.pointerId);if(!state)return;pointerTouches.delete(event.pointerId);
    if(state.forwarded)forwardTouch(type==='pointerup'?'touchend':'touchcancel',[{identifier:event.pointerId,clientX:event.clientX,clientY:event.clientY}]);
   });
-  // 互換マウスイベントでタッチ用レイアウトへ戻れなくなるのを防ぐ。
-  for(const type of ['mousedown','mouseup','mousemove'])canvas.addEventListener(type,event=>{if(event.sourceCapabilities?.firesTouchEvents){event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
+  // 互換マウスイベントでタッチ用レイアウトへ戻れなくなるのを防ぐ。SafariはsourceCapabilitiesが無いので、直近のタッチ時刻でも止める。
+  for(const type of ['touchstart','touchmove','touchend','touchcancel'])canvas.addEventListener(type,()=>{lastTouch=performance.now();},{capture:true,passive:true});
+  for(const type of ['mousedown','mouseup','mousemove','click','dblclick'])canvas.addEventListener(type,event=>{if(event.sourceCapabilities?.firesTouchEvents||performance.now()-lastTouch<800){event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
+  // iOSのピンチ・ダブルタップ拡大を止める(canvasだけ。ローディングのボタンには付けない)。
+  for(const type of ['gesturestart','gesturechange'])document.addEventListener(type,event=>event.preventDefault(),{passive:false});
+  canvas.addEventListener('touchend',event=>{if(event.cancelable)event.preventDefault();},{passive:false});
+  // 隠れた・フォーカスを失った時は、転送中の指をすべて離した扱いにする。
+  function cancelAllTouches(){
+   const points=[];
+   for(const [id,state] of pointerTouches)if(state.forwarded)points.push({identifier:id,clientX:state.point.clientX,clientY:state.point.clientY});
+   pointerTouches.clear();
+   if(points.length)forwardTouch('touchcancel',points);
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAllTouches();});
+  addEventListener('blur',cancelAllTouches);
+  addEventListener('pagehide',cancelAllTouches);
 window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
 window.stardustSafeArea=function(){const s=getComputedStyle(document.getElementById('safe'));return [s.paddingLeft,s.paddingTop,s.paddingRight,s.paddingBottom].map(parseFloat);};
 const RENDER_QUALITY={mobilePixels:2073600,desktopPixels:4147200,maxRatio:2};
@@ -106,7 +121,7 @@ const engine=new Engine(config);
 const options={canvas,canvasResizePolicy:0,onProgress:(current,total)=>{if(total>0){progress.max=total;progress.value=current;}},onPrint:(...args)=>{const line=args.join(' ');console.log(line);if(line.startsWith('[PERF]')||line.startsWith('[WEB]'))window.stardustMetrics.logs.push(line);},onPrintError:(...args)=>console.error(...args)};
 // テスト引数は明示的なQA URLだけ。通常URLに検証用の通貨などを渡さない。
 const query=new URLSearchParams(location.search);
-if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile','stage','stage_time','stage_waves','defense','fuel','cargo','sel','nopause']);options.args=(query.has('stress')||query.has('bot')||query.has('force_result')||query.has('fuel'))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
+if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','universe','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile','stage','stage_time','stage_waves','defense','fuel','cargo','sel','nopause','inputlog','ctrl']);options.args=(query.has('stress')||query.has('bot')||query.has('force_result')||query.has('fuel')||query.has('inputlog'))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
 function failure(error){const el=document.getElementById('error');el.hidden=false;el.textContent=String(error);message.textContent=say('起動できませんでした。ページを再読み込みしてください。','Unable to start. Please reload this page.');progress.hidden=true;}
 const missing=Engine.getMissingFeatures({threads:false});
 if(missing.length)failure(say('このブラウザに必要な機能がありません: ','Missing browser features: ')+missing.join(', '));
