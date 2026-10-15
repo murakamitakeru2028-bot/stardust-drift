@@ -29,7 +29,7 @@ progress{width:min(280px,70vw);height:6px;border:none;border-radius:6px;backgrou
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":6040704,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":6040736,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -79,9 +79,9 @@ window.stardustAudioUnlocked=false;
    const state=pointerTouches.get(event.pointerId);if(!state)return;pointerTouches.delete(event.pointerId);
    if(state.forwarded)forwardTouch(type==='pointerup'?'touchend':'touchcancel',[{identifier:event.pointerId,clientX:event.clientX,clientY:event.clientY}]);
   });
-  // 互換マウスイベントでタッチ用レイアウトへ戻れなくなるのを防ぐ。SafariはsourceCapabilitiesが無いので、直近のタッチ時刻でも止める。
+  // 互換マウスイベントでタッチ用レイアウトへ戻れなくなるのを防ぐ。止めるのはゲーム画面 (canvas) 宛てだけ (読み込み画面のボタンのタップを止めない)。SafariはsourceCapabilitiesが無いので、直近のタッチ時刻でも止める。
   for(const type of ['touchstart','touchmove','touchend','touchcancel'])canvas.addEventListener(type,event=>{lastTouch=performance.now();for(const touch of event.changedTouches){if(type==='touchstart')activeTouches.add(touch.identifier);else if(type==='touchend'||type==='touchcancel')activeTouches.delete(touch.identifier);}},{capture:true,passive:true});
-  for(const target of [canvas,window])for(const type of ['mousedown','mouseup','mousemove','click','dblclick'])target.addEventListener(type,event=>{if(event.sourceCapabilities?.firesTouchEvents||activeTouches.size>0||performance.now()-lastTouch<1500){event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
+  for(const target of [canvas,window])for(const type of ['mousedown','mouseup','mousemove','click','dblclick'])target.addEventListener(type,event=>{if(event.target!==canvas)return;if(event.sourceCapabilities?.firesTouchEvents||activeTouches.size>0||performance.now()-lastTouch<1500){event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
   // iOSのピンチ・ダブルタップ拡大を止める(canvasだけ。ローディングのボタンには付けない)。
   for(const type of ['gesturestart','gesturechange'])document.addEventListener(type,event=>event.preventDefault(),{passive:false});
   canvas.addEventListener('touchend',event=>{if(event.cancelable)event.preventDefault();},{passive:false});

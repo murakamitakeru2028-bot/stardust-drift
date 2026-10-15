@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1792039897|4938823';
+const CACHE_VERSION = '1792040257|4483352';
 /** @type {string} */
 const CACHE_PREFIX = 'COSMINE-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
