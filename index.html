@@ -6,13 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="COSMINE">
-<title>COSMINE · v0.13</title>
+<title>COSMINE · v0.14</title>
 <link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
 
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#24212E;color:#FFFFFF;font-family:system-ui,sans-serif;overscroll-behavior:none;touch-action:none}
+*{box-sizing:border-box}html,body{position:fixed;inset:0;margin:0;width:100%;height:100%;overflow:hidden;background:#24212E;color:#FFFFFF;font-family:system-ui,sans-serif;overscroll-behavior:none;touch-action:none;-webkit-text-size-adjust:100%;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #canvas{position:fixed;inset:0;width:100%;height:100%;outline:none;display:block;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 #safe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 #loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:22px;padding:max(32px,env(safe-area-inset-top)) 20px max(32px,env(safe-area-inset-bottom));overflow-y:auto;text-align:center;background:radial-gradient(ellipse at 50% 40%,#352F45,#24212E 70%);z-index:2;touch-action:pan-y;isolation:isolate}
@@ -22,14 +22,15 @@
 progress{width:min(280px,70vw);height:6px;border:none;border-radius:6px;background:#352F45;color:#38D9C7}progress::-webkit-progress-bar{background:#352F45;border-radius:6px}progress::-webkit-progress-value{background:#38D9C7;border-radius:6px}progress::-moz-progress-bar{background:#38D9C7;border-radius:6px}
 #play{background:#38D9C7;border:0;border-radius:14px;box-shadow:0 6px 0 #198480;color:#24212E;font-size:17px;font-weight:750;padding:16px 36px;min-height:56px;cursor:pointer;touch-action:manipulation;margin-bottom:6px}#play:active{transform:translateY(4px);box-shadow:0 2px 0 #198480}#play:focus-visible,#install:focus-visible{outline:2px solid #FFFFFF;outline-offset:5px}#play[hidden]{display:none}small{color:#A9A6BF;font-size:12px}#error{white-space:pre-wrap;overflow-wrap:anywhere;max-width:560px;color:#F7597B}
 #install-controls{max-width:360px}#install{border:1px solid #A9A6BF;background:transparent;color:#FFFFFF;border-radius:14px;padding:12px 20px;min-height:48px;font-size:14px;cursor:pointer;touch-action:manipulation}#install:active{border-color:#38D9C7;color:#38D9C7}#install-help{font-size:13px;line-height:1.6;color:#A9A6BF;margin:10px 0 0}#install-controls[hidden],#install-help[hidden]{display:none}
+#copybox textarea{-webkit-user-select:text;user-select:text}#copybox{position:fixed;inset:0;z-index:3;background:#24212Eaa;display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 16px}#copybox>div{width:min(480px,100%);padding:16px;border:1px solid #A9A6BF;border-radius:14px;background:#24212Eee}#copybox textarea{display:block;width:100%;height:160px;margin-bottom:12px;padding:10px;border:1px solid #A9A6BF;border-radius:8px;background:#352F45;color:#FFFFFF;-webkit-user-select:text;user-select:text}#copybox button{min-height:44px;padding:10px 16px;margin-right:8px;border:0;border-radius:8px;background:#38D9C7;color:#24212E;cursor:pointer}
 @media(max-height:480px){#loading{gap:12px}.title{font-size:28px}}
 </style></head><body>
 <canvas id="canvas" tabindex="0" aria-label="COSMINE game"></canvas><div id="safe"></div>
-<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">COS<span>MI</span>NE</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.13</small></div>
+<div id="loading"><p class="brand-label">SPACE MINING</p><h1 class="title">COS<span>MI</span>NE</h1><p id="message"></p><progress id="progress"></progress><button id="play" hidden></button><p id="error" hidden></p><small>v0.14</small></div>
 <noscript>JavaScript is required to play.</noscript>
 <script src="index.js"></script><script>
 'use strict';
-const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":6066784,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
+const config={"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":6108544,"index.wasm":35376909},"focusCanvas":false,"gdextensionLibs":[],"serviceWorker":"index.service.worker.js"}, canvas=document.getElementById('canvas');
 const japanese=navigator.language.toLowerCase().startsWith('ja'), say=(ja,en)=>japanese?ja:en;
 document.documentElement.lang=japanese?'ja':'en';
 const installStrings={"web.install.button": ["Add to home screen", "ホーム画面に追加"], "web.install.ios": ["Open this page in Safari. Tap Share, then Add to Home Screen, then Add.", "Safariでこのページを開き、共有ボタン →「ホーム画面に追加」→「追加」を押してください。"], "web.install.manual": ["Open your browser menu and choose Install app or Add to Home Screen. If unavailable, open this page in Chrome or Safari.", "ブラウザーのメニューから「アプリをインストール」または「ホーム画面に追加」を選んでください。表示されない場合はChromeかSafariで開いてください。"]};
@@ -106,10 +107,13 @@ window.stardustAudioUnlocked=false;
     else godotTouches.delete(p.identifier);
    }
   },{capture:true,passive:true});
+  canvas.addEventListener('touchstart',event=>{if(event.cancelable)event.preventDefault();},{passive:false});
   // 互換マウスの除外は canvas 宛てだけに限定する。
   for(const target of [canvas,window])for(const type of ['mousedown','mouseup','mousemove','click','dblclick'])target.addEventListener(type,event=>{if(event.target!==canvas)return;if(event.sourceCapabilities?.firesTouchEvents||godotTouches.size>0||performance.now()-lastTouch<1500){dbg.mb++;event.stopImmediatePropagation();event.preventDefault();}},{capture:true,passive:false});
   canvas.addEventListener('mousedown',()=>{dbg.mp++;},{passive:true});
   // iOS のピンチ・ダブルタップ拡大を止める。
+  // Safari のタブでは端のスワイプによる「戻る」は完全には止められない。ホーム画面に追加すると発生しない。
+  for(const type of ['contextmenu','selectstart','dblclick','touchmove'])document.addEventListener(type,event=>{if(!event.target.closest?.('#loading,#copybox'))event.preventDefault();},{passive:false});
   for(const type of ['gesturestart','gesturechange'])document.addEventListener(type,event=>event.preventDefault(),{passive:false});
   canvas.addEventListener('touchend',event=>{if(event.cancelable)event.preventDefault();},{passive:false});
   // 隠れた・フォーカスを失った時は、Godot に伝えた指をすべて離す。
@@ -118,11 +122,40 @@ window.stardustAudioUnlocked=false;
    pointerTouches.clear();godotTouches.clear();
    if(points.length){if(!touchEvents)dbg.fw++;forwardTouch('touchcancel',points);}
   }
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAllTouches();});
-  addEventListener('blur',cancelAllTouches);
-  addEventListener('pagehide',cancelAllTouches);
+  function onHidden(){cancelAllTouches();try{window.stardustOnHidden?.();}catch(error){console.debug('Pause callback unavailable:',error);}}
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)onHidden();else resumeAudio();});
+  addEventListener('blur',onHidden);
+  addEventListener('pagehide',onHidden);
+  const AC=window.AudioContext||window.webkitAudioContext;window.stardustAudioContexts=[];
+  if(AC){const Wrapped=class extends AC{constructor(...a){super(...a);window.stardustAudioContexts.push(this);}};window.AudioContext=Wrapped;if(window.webkitAudioContext)window.webkitAudioContext=Wrapped;}
+  function resumeAudio(){for(const c of window.stardustAudioContexts)if(c.state!=='running'&&c.state!=='closed'){dbg.ar=(dbg.ar||0)+1;c.resume().catch(()=>{});}}
+  addEventListener('pageshow',resumeAudio);
+  addEventListener('focus',resumeAudio);
+  for(const type of ['touchend','pointerup','keydown'])document.addEventListener(type,resumeAudio,{capture:true,passive:true});
+  window.stardustAudioState=()=>window.stardustAudioContexts.map(c=>c.state).join(',')||'none';
 window.stardustMetrics={start:performance.now(),frames:[],logs:[],ready:0,tap:0};
 window.stardustSafeArea=function(){const s=getComputedStyle(document.getElementById('safe'));return [s.paddingLeft,s.paddingTop,s.paddingRight,s.paddingBottom].map(parseFloat);};
+window.stardustDeviceInfo=()=>{
+ const ios=/\b(?:CPU(?: iPhone)? OS|iPhone OS) ([\d_]+)/.exec(ua),android=/Android\s+([\d.]+)/.exec(ua);
+ const androidModel=android?(ua.split(')')[0].split('; ').slice(1).filter(part=>!/^Android\b|^Linux\b|^U$|^[a-z]{2}(?:[-_][A-Z]{2})?$/.test(part)).at(-1)||'Android').replace(/\s+Build\/.*/, ''):null;
+ const browser=/CriOS/.test(ua)?'Chrome':/FxiOS/.test(ua)?'Firefox':/EdgiOS|Edg\//.test(ua)?'Edge':/Version\/.*Safari/.test(ua)?'Safari':/Chrome/.test(ua)?'Chrome':'unknown';
+ return JSON.stringify({os:ios?'iOS '+ios[1].replace(/_/g,'.'):android?'Android '+android[1]:navigator.platform,model:/iPhone/.test(ua)?'iPhone':/iPad/.test(ua)||iosLike?'iPad':android?androidModel:'desktop',browser,standalone:installed(),dpr:devicePixelRatio,vw:innerWidth,vh:innerHeight,orient:innerHeight>=innerWidth?'portrait':'landscape',safe:window.stardustSafeArea(),mem:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):-1,wasm:-1,audio:window.stardustAudioState(),ar:dbg.ar||0});
+};
+window.stardustCopy=text=>{
+ try{navigator.clipboard?.writeText(text).catch(()=>{});}catch(error){/* ボタンから再試行できる。 */}
+ document.getElementById('copybox')?.remove();
+ const box=document.createElement('div');box.id='copybox';
+ const panel=document.createElement('div'),area=document.createElement('textarea'),copy=document.createElement('button'),close=document.createElement('button');
+ area.readOnly=true;area.value=text;copy.textContent=say('コピー','Copy');close.textContent=say('閉じる','Close');
+ copy.addEventListener('click',async()=>{
+  let copied=false;
+  try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(text);copied=true;}}catch(error){/* 選択範囲のコピーへフォールバックする。 */}
+  if(!copied){area.focus();area.select();area.setSelectionRange(0,area.value.length);try{copied=document.execCommand('copy');}catch(error){/* 選択したテキストは残す。 */}}
+  if(copied)copy.textContent=say('コピーしました','Copied');
+ });
+ close.addEventListener('click',()=>box.remove());
+ panel.append(area,copy,close);box.append(panel);document.body.append(box);area.focus();area.select();area.setSelectionRange(0,area.value.length);
+};
 const RENDER_QUALITY={mobilePixels:2073600,desktopPixels:4147200,maxRatio:2};
 function resize(){const w=innerWidth,h=innerHeight,budget=window.stardustMobile?RENDER_QUALITY.mobilePixels:RENDER_QUALITY.desktopPixels;const full=new URLSearchParams(location.search).get('qa')==='1'&&new URLSearchParams(location.search).get('render')==='full';const r=full?(devicePixelRatio||1):Math.min(devicePixelRatio||1,RENDER_QUALITY.maxRatio,Math.sqrt(budget/(w*h)));canvas.width=Math.max(1,Math.round(w*r));canvas.height=Math.max(1,Math.round(h*r));}
 resize();addEventListener('resize',resize);addEventListener('orientationchange',resize);
@@ -148,7 +181,8 @@ const engine=new Engine(config);
 const options={canvas,canvasResizePolicy:0,onProgress:(current,total)=>{if(total>0){progress.max=total;progress.value=current;}},onPrint:(...args)=>{const line=args.join(' ');console.log(line);if(line.startsWith('[PERF]')||line.startsWith('[WEB]'))window.stardustMetrics.logs.push(line);},onPrintError:(...args)=>console.error(...args)};
 // テスト引数は明示的なQA URLだけ。通常URLに検証用の通貨などを渡さない。
 const query=new URLSearchParams(location.search);
-if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','universe','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile','stage','stage_time','stage_waves','defense','fuel','cargo','sel','nopause','inputlog','ctrl','world','auto','hitch','safe','ui','lefty','retouch','layout','inputdbg']);options.args=(!query.has('flow')&&(query.has('stress')||query.has('bot')||query.has('force_result')||query.has('fuel')||query.has('inputlog')))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
+if(query.get('qa')==='1'){const allowed=new Set(['stress','perf','seed','universe','bot','notut','nosave','sp','bs','up','hp','start','unlock','lang','open','save','fresh','force_result','notrans','sfxlog','web_save_probe','touch','dpi','mobile','stage','stage_time','stage_waves','defense','fuel','cargo','sel','nopause','inputlog','ctrl','world','auto','hitch','safe','ui','lefty','retouch','layout','inputdbg','tlayout','stick']);options.args=(!query.has('flow')&&(query.has('stress')||query.has('bot')||query.has('force_result')||query.has('fuel')||query.has('inputlog')))?['res://scenes/space.tscn','--']:['--'];for(const [key,value] of query)if(allowed.has(key))options.args.push('--'+key+(value?'='+value:''));}
+if(query.get('check')==='1'){if(!options.args)options.args=['--'];options.args.push('--check');}
 function failure(error){const el=document.getElementById('error');el.hidden=false;el.textContent=String(error);message.textContent=say('起動できませんでした。ページを再読み込みしてください。','Unable to start. Please reload this page.');progress.hidden=true;}
 const missing=Engine.getMissingFeatures({threads:false});
 if(missing.length)failure(say('このブラウザに必要な機能がありません: ','Missing browser features: ')+missing.join(', '));
